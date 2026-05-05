@@ -7,10 +7,13 @@ use std::{
 
 use beanstalkd_parser::parse_command;
 
+/// main entrypoint for the beanstalkd server
 fn main() {
     let config = get_config();
     start_tcp_server(config);
 }
+
+/// gets configuration from the config.toml file
 fn get_config() -> Config {
     Config::builder()
         .add_source(config::File::with_name("config.toml"))
@@ -18,6 +21,7 @@ fn get_config() -> Config {
         .unwrap()
 }
 
+/// starts the TCP server and listens for incoming connections
 fn start_tcp_server(config: Config) {
     let port = config
         .get("tcp_port")
@@ -30,6 +34,7 @@ fn start_tcp_server(config: Config) {
     }
 }
 
+/// handles an incoming TCP connection, reads the request, parses it, and sends a response back to the client
 fn handle_connection(mut stream: TcpStream) {
     println!("Handling connection from {}", stream.peer_addr().unwrap());
     let buf_reader = BufReader::new(&mut stream);
