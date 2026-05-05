@@ -5,3 +5,4 @@ edition = "2024"
 
 [dependencies]
 beanstalkd_parser = { version = "0.1.0", path = "lib/beanstalkd_parser" }
+config = "0.15.22"

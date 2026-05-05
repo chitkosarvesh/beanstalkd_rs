@@ -1,4 +1,5 @@
 use beanstalkd_parser::response::{Response, convert_response};
+use config::Config;
 use std::{
     io::{BufRead, BufReader, Write},
     net::{TcpListener, TcpStream},
@@ -7,13 +8,28 @@ use std::{
 use beanstalkd_parser::parse_command;
 
 fn main() {
-    let listener = TcpListener::bind("0.0.0.0:11300").unwrap();
+    let config = get_config();
+    start_tcp_server(config);
+}
+fn get_config() -> Config {
+    Config::builder()
+        .add_source(config::File::with_name("config.toml"))
+        .build()
+        .unwrap()
+}
+
+fn start_tcp_server(config: Config) {
+    let port = config
+        .get("tcp_port")
+        .unwrap_or_else(|_| "11300".to_string());
+    println!("Starting TCP server on port {}", port);
+    let listener = TcpListener::bind(format!("0.0.0.0:{}", port)).unwrap();
     for stream in listener.incoming() {
         let _stream = stream.unwrap();
-        println!("New connection!");
         handle_connection(_stream);
     }
 }
+
 fn handle_connection(mut stream: TcpStream) {
     println!("Handling connection from {}", stream.peer_addr().unwrap());
     let buf_reader = BufReader::new(&mut stream);
