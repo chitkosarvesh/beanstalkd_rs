@@ -1,8 +1,3 @@
-[package]
-name = "beanstalkd_rs"
-version = "0.1.0"
-edition = "2024"
-
-[dependencies]
-beanstalkd_parser = { version = "0.1.0", path = "lib/beanstalkd_parser" }
-config = "0.15.22"
+[workspace]
+resolver = "3"
+members = ["beanstalkd_parser", "beanstalkd_rs"]

@@ -33,7 +33,9 @@ pub fn parse_put(input: &str) -> IResult<&str, Command<'_>> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::parse_command;
+
+use super::*;
 
     #[test]
     fn test_put() {
