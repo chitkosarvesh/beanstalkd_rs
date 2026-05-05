@@ -9,6 +9,7 @@ use beanstalkd_parser::parse_command;
 
 /// main entrypoint for the beanstalkd server
 fn main() {
+    log4rs::init_file("log4rs.yml", Default::default()).unwrap();
     let config = get_config();
     start_tcp_server(config);
 }
@@ -26,7 +27,7 @@ fn start_tcp_server(config: Config) {
     let port = config
         .get("tcp_port")
         .unwrap_or_else(|_| "11300".to_string());
-    println!("Starting TCP server on port {}", port);
+    log::info!("Starting TCP server on port {}", port);
     let listener = TcpListener::bind(format!("0.0.0.0:{}", port)).unwrap();
     for stream in listener.incoming() {
         let _stream = stream.unwrap();
@@ -36,7 +37,7 @@ fn start_tcp_server(config: Config) {
 
 /// handles an incoming TCP connection, reads the request, parses it, and sends a response back to the client
 fn handle_connection(mut stream: TcpStream) {
-    println!("Handling connection from {}", stream.peer_addr().unwrap());
+    log::info!("Handling connection from {}", stream.peer_addr().unwrap());
     let buf_reader = BufReader::new(&mut stream);
     let request = buf_reader
         .lines()
@@ -45,10 +46,10 @@ fn handle_connection(mut stream: TcpStream) {
         .collect::<Vec<_>>()
         .join("\r\n")
         + "\r\n";
-    println!("Received request:\n{}", request);
+    log::info!(target:"server::tcp", "Received request:\n{}", request);
     match parse_command(request.as_str()) {
         Ok((_, cmd)) => {
-            println!("Parsed command: {:?}", cmd);
+            log::info!(target:"server::tcp", "Parsed command: {:?}", cmd);
             stream
                 .write((convert_response(Response::Inserted { id: 1 }) + "\r\n").as_bytes())
                 .unwrap();
@@ -56,7 +57,7 @@ fn handle_connection(mut stream: TcpStream) {
             // Here you would handle the command and send a response back to the client
         }
         Err(e) => {
-            println!("Failed to parse command: {:?}", e);
+            log::error!(target:"server::tcp", "Failed to parse command: {:?}", e);
             // Here you would send an error response back to the client
         }
     }
