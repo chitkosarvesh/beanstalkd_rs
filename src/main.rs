@@ -29,8 +29,9 @@ fn handle_connection(mut stream: TcpStream) {
         Ok((_, cmd)) => {
             println!("Parsed command: {:?}", cmd);
             stream
-                .write(convert_response(Response::Inserted { id: 1 }).as_bytes())
+                .write((convert_response(Response::Inserted { id: 1 }) + "\r\n").as_bytes())
                 .unwrap();
+            handle_connection(stream);
             // Here you would handle the command and send a response back to the client
         }
         Err(e) => {
