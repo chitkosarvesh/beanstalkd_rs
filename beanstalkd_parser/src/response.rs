@@ -17,6 +17,7 @@ pub enum Response {
     Kicked,
     Ok { count: u16 },
     Paused,
+    InvalidCommand,
 }
 
 pub fn convert_response(response: Response) -> String {
@@ -39,6 +40,7 @@ pub fn convert_response(response: Response) -> String {
         Response::Kicked => "KICKED".into(),
         Response::Ok { count } => format!("OK {}", count),
         Response::Paused => "PAUSED".into(),
+        Response::InvalidCommand => "INVALID_COMMAND".into(),
     }
 }
 

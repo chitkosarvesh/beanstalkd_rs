@@ -59,6 +59,10 @@ fn handle_connection(mut stream: TcpStream) {
         Err(e) => {
             log::error!(target:"server::tcp", "Failed to parse command: {:?}", e);
             // Here you would send an error response back to the client
+            stream
+                .write((convert_response(Response::InvalidCommand) + "\r\n").as_bytes())
+                .unwrap();
+            handle_connection(stream);
         }
     }
 }
