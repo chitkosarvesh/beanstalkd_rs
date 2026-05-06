@@ -24,11 +24,12 @@ fn get_config() -> Config {
 
 /// starts the TCP server and listens for incoming connections
 fn start_tcp_server(config: Config) {
+    let host = config.get("host").unwrap_or_else(|_| "0.0.0.0".to_string());
     let port = config
         .get("tcp_port")
         .unwrap_or_else(|_| "11300".to_string());
-    log::info!("Starting TCP server on port {}", port);
-    let listener = TcpListener::bind(format!("0.0.0.0:{}", port)).unwrap();
+    log::info!("Starting TCP server on {}:{}", host, port);
+    let listener = TcpListener::bind(format!("{}:{}", host, port)).unwrap();
     for stream in listener.incoming() {
         let _stream = stream.unwrap();
         handle_connection(_stream);
