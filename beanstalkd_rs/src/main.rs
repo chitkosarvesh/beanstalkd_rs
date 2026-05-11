@@ -6,11 +6,12 @@ use std::{
 };
 
 use beanstalkd_parser::parse_command;
+use beanstalkd_server::BeanstalkdServer;
 mod beanstalkd_server;
 
 /// main entrypoint for the beanstalkd server
 fn main() {
-    let _server = beanstalkd_server::BeanstalkdServer::new();
+    let _server = BeanstalkdServer::new();
     log4rs::init_file("log4rs.yml", Default::default()).unwrap();
     let config = get_config();
     start_tcp_server(config);
