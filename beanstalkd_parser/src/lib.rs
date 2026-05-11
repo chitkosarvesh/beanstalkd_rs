@@ -1,4 +1,4 @@
-mod command;
+pub mod command;
 mod parsers;
 pub mod response;
 use nom::{IResult, Parser, branch::alt};

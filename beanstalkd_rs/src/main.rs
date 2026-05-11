@@ -6,9 +6,11 @@ use std::{
 };
 
 use beanstalkd_parser::parse_command;
+mod beanstalkd_server;
 
 /// main entrypoint for the beanstalkd server
 fn main() {
+    let _server = beanstalkd_server::BeanstalkdServer::new();
     log4rs::init_file("log4rs.yml", Default::default()).unwrap();
     let config = get_config();
     start_tcp_server(config);
@@ -31,8 +33,7 @@ fn start_tcp_server(config: Config) {
     log::info!("Starting TCP server on {}:{}", host, port);
     let listener = TcpListener::bind(format!("{}:{}", host, port)).unwrap();
     for stream in listener.incoming() {
-        let _stream = stream.unwrap();
-        handle_connection(_stream);
+        handle_connection(stream.unwrap());
     }
 }
 
@@ -51,8 +52,9 @@ fn handle_connection(mut stream: TcpStream) {
     match parse_command(request.as_str()) {
         Ok((_, cmd)) => {
             log::info!(target:"server::tcp", "Parsed command: {:?}", cmd);
+            let response = process_command(cmd);
             stream
-                .write((convert_response(Response::Inserted { id: 1 }) + "\r\n").as_bytes())
+                .write((convert_response(response) + "\r\n").as_bytes())
                 .unwrap();
             handle_connection(stream);
             // Here you would handle the command and send a response back to the client
@@ -65,5 +67,14 @@ fn handle_connection(mut stream: TcpStream) {
                 .unwrap();
             handle_connection(stream);
         }
+    }
+}
+
+fn process_command(cmd: beanstalkd_parser::command::Command) -> Response {
+    match cmd {
+        beanstalkd_parser::command::Command::Use { tube } => Response::Using {
+            tube: tube.to_string(),
+        },
+        _ => Response::InvalidCommand,
     }
 }
